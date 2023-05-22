@@ -70,26 +70,26 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         author = get_object_or_404(User, id=kwargs.get('id'))
         if request.method == 'POST':
-            serializer = SubscribeSerializer(author,
-                                             data=request.data,
-                                             context={"request": request})
+            serializer = SubscribeSerializer(
+                data={'author': self.kwargs['id'],
+                      'user': self.request.user.id},
+                context={"request": request})
             serializer.is_valid(raise_exception=True)
-            if request.user == author:
-                return Response('Нельзя подписаться на самого себя.',
-                                status=status.HTTP_400_BAD_REQUEST)
             if not Follow.objects.filter(user=request.user, author=author):
                 Follow.objects.create(user=request.user, author=author)
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-            return Response('Вы уже подписаны на этого пользователя.',
+                return Response(
+                    SubscriptionsSerializer(
+                        instance=User.objects.get(id=self.kwargs['id']),
+                        context={'request': request}).data,
+                    status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            is_in_subscriptions = Follow.objects.filter(
+                user=request.user, author=author)
+            if is_in_subscriptions:
+                is_in_subscriptions.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response('Вы не подписаны на этого пользователя.',
                             status=status.HTTP_400_BAD_REQUEST)
-        is_in_subscriptions = Follow.objects.filter(
-            user=request.user, author=author)
-        if is_in_subscriptions:
-            is_in_subscriptions.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response('Вы не подписаны на этого пользователя.',
-                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class IngredientListViewSet(viewsets.ReadOnlyModelViewSet):

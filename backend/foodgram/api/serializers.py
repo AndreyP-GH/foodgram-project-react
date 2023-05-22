@@ -38,7 +38,7 @@ class RegistrationSerializer(UserCreateSerializer):
 
     def validate(self, data):
         username = data.get('username')
-        if username == 'me':
+        if username.lower() == 'me':
             raise ValidationError(
                 'Имя пользователя me недопустимо. Используйте другое имя.')
         return data
@@ -114,25 +114,43 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
         return obj.recipes.count()
 
 
-class SubscribeSerializer(SubscriptionsSerializer):
+class SubscribeSerializer(serializers.ModelSerializer):
     """Подписка на автора. Запись и удаление."""
 
-    email = serializers.ReadOnlyField()
-    username = serializers.ReadOnlyField()
-    recipes = RecipeSimplifiedSerializer(many=True, read_only=True)
-
     class Meta:
-        model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipes_count')
-        extra_kwargs = {
-            'first_name': {'read_only': True},
-            'last_name': {'read_only': True}
-        }
+        model = Follow
+        fields = ('user', 'author')
+
+    def validate(self, data):
+        user = data['user']
+        author = data['author']
+        if user == author:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя.')
+        if Follow.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого пользователя.')
+        return data
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if not user.is_anonymous:
+            return Follow.objects.filter(user=user, author=obj).exists()
+        return False
+
+    def get_recipes(self, obj):
+        recipes = obj.recipes.all()
+        serializer = RecipeSimplifiedSerializer(recipes,
+                                                many=True,
+                                                read_only=True)
+        return serializer.data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Отдельный тег/ спискок тегов. Чтение."""
+    """Отдельный ингредиент/ список ингредиентов. Чтение."""
 
     class Meta:
         model = Ingredient
@@ -140,7 +158,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """Отдельный ингредиент/ список ингредиентов. Чтение."""
+    """Отдельный тег/ спискок тегов. Чтение."""
 
     class Meta:
         model = Tag
@@ -230,7 +248,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if len(ingredients) != len(set([item['id'] for item in ingredients])):
             raise serializers.ValidationError(
                 'Этот ингредиент уже добавлен.')
-        if len(tags) != len(set([item for item in tags])):
+        if len(tags) != len(set(tags)):
             raise serializers.ValidationError('Этот тег уже добавлен.')
         return data
 
