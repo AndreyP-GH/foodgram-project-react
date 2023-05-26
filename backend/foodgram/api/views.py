@@ -2,13 +2,12 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.conf import settings
+from djoser.views import UserViewSet
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import mixins, status, viewsets
-
-from djoser.conf import settings
-from djoser.views import UserViewSet
 
 from api.filters import IngredientFilter, RecipeFilters
 from api.pagination import CustomPagination
@@ -19,8 +18,8 @@ from api.serializers import (CustomUserSerializer, IngredientSerializer,
                              SubscribeSerializer, SubscriptionsSerializer,
                              TagSerializer)
 from foodgram.settings import FILE_NAME
-from recipes.models import (Favorites, Ingredient, IngredientRecipe,
-                            Recipe, ShoppingCart, Tag)
+from recipes.models import (Favorites, Ingredient, IngredientRecipe, Recipe,
+                            ShoppingCart, Tag)
 from users.models import Follow, User
 
 
@@ -38,9 +37,9 @@ class CustomUserViewSet(UserViewSet):
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return CustomUserSerializer
-        elif self.action == "set_password":
+        if self.action == "set_password":
             return settings.SERIALIZERS.set_password
-        elif self.action == "me":
+        if self.action == "me":
             return settings.SERIALIZERS.current_user
         return RegistrationSerializer
 
@@ -49,8 +48,7 @@ class CustomUserViewSet(UserViewSet):
             permission_classes=(IsAuthenticated,))
     def me(self, request, **kwargs):
         self.get_object = self.get_instance
-        if request.method == "GET":
-            return self.retrieve(request, **kwargs)
+        return self.retrieve(request, **kwargs)
 
     @action(methods=['get'],
             detail=False,
@@ -82,14 +80,16 @@ class CustomUserViewSet(UserViewSet):
                         instance=User.objects.get(id=self.kwargs['id']),
                         context={'request': request}).data,
                     status=status.HTTP_201_CREATED)
-        if request.method == 'DELETE':
-            is_in_subscriptions = Follow.objects.filter(
-                user=request.user, author=author)
-            if is_in_subscriptions:
-                is_in_subscriptions.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response('Вы не подписаны на этого пользователя.',
+            return Response('Вы уже подписаны на этого пользователя.',
                             status=status.HTTP_400_BAD_REQUEST)
+        # if request.method == 'DELETE':
+        is_in_subscriptions = Follow.objects.filter(
+            user=request.user, author=author)
+        if is_in_subscriptions:
+            is_in_subscriptions.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response('Вы не подписаны на этого пользователя.',
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class IngredientListViewSet(viewsets.ReadOnlyModelViewSet):

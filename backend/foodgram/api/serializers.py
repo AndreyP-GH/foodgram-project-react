@@ -1,14 +1,13 @@
 import base64
 
 from django.core.files.base import ContentFile
-from djoser.serializers import (SetPasswordSerializer,
-                                UserCreateSerializer,
+from djoser.serializers import (SetPasswordSerializer, UserCreateSerializer,
                                 UserSerializer)
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
-from recipes.models import (Favorites, Ingredient, IngredientRecipe,
-                            Recipe, ShoppingCart, Tag)
+from recipes.models import (Favorites, Ingredient, IngredientRecipe, Recipe,
+                            ShoppingCart, Tag)
 from users.models import Follow, User
 
 
@@ -127,9 +126,9 @@ class SubscribeSerializer(serializers.ModelSerializer):
         if user == author:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя.')
-        if Follow.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError(
-                'Вы уже подписаны на этого пользователя.')
+        # if Follow.objects.filter(user=user, author=author).exists():
+        #     raise serializers.ValidationError(
+        #         'Вы уже подписаны на этого пользователя.')
         return data
 
 
