@@ -8,7 +8,7 @@ from recipes.models import (Favorites, Ingredient, IngredientRecipe,
 class FavoritesAdmin(admin.ModelAdmin):
     """Отображение избранных рецептов в админ-панели."""
 
-    list_display = ('pk', 'user')
+    list_display = ('pk', 'user', 'recipe')
     list_editable = ('user',)
     search_fields = ('user', 'recipe',)
     list_filter = ('user', 'recipe',)
@@ -44,7 +44,7 @@ class RecipeAdmin(admin.ModelAdmin):
                     'text', 'image', 'cooking_time', 'count_favorites',)
     list_editable = ('name', 'text', 'image', 'cooking_time',)
     search_fields = ('author__username', 'name', 'tags__name',)
-    list_filter = ('author', 'tags',)
+    list_filter = ('author', 'tags', 'name',)
     empty_value_display = '-пусто-'
     inlines = [IngredientRecipeInline, TagRecipeInline]
 

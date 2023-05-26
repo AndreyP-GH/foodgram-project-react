@@ -5,12 +5,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import mixins, status, viewsets
 
 from djoser.conf import settings
 from djoser.views import UserViewSet
 
-from api.filters import RecipeFilters
+from api.filters import IngredientFilter, RecipeFilters
 from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (CustomUserSerializer, IngredientSerializer,
@@ -99,8 +99,8 @@ class IngredientListViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
     pagination_class = None
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ('^name',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):

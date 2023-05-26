@@ -132,22 +132,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
                 'Вы уже подписаны на этого пользователя.')
         return data
 
-    def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if not user.is_anonymous:
-            return Follow.objects.filter(user=user, author=obj).exists()
-        return False
-
-    def get_recipes(self, obj):
-        recipes = obj.recipes.all()
-        serializer = RecipeSimplifiedSerializer(recipes,
-                                                many=True,
-                                                read_only=True)
-        return serializer.data
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Отдельный ингредиент/ список ингредиентов. Чтение."""

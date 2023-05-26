@@ -1,26 +1,24 @@
-# import os
+import os
 from pathlib import Path
 
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-9u*!3czn4)ci^7hh!6+b%#!4z9d)w$i25$1wh^ih^28%kpzyj9'  # потом спрятать в str(os.getenv('SECRET_KEY'))
+SECRET_KEY = os.getenv('SECRET_KEY', default='sercret_key')
 
-DEBUG = True
+DEBUG = False
 
-# на втором этапе заменить на
-# '158.160.61.6',
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '[::1]',
-    'testserver',
+    'backend',
+    'db',
+    '158.160.61.6',
 ]
 
-# на втором этапе добавить corsheaders' + pip install django-cors-headers && pip freeze > requirements.txt
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,9 +34,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'django_filters',
+    'corsheaders',
 ]
 
-# на втором этапе добавить 'corsheaders.middleware.CorsMiddleware'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -47,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -71,23 +70,14 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='db'),
+        'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
-
-# на втором этапе заменить на postgresql
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv('ENGINE',
-#                             default='django.db.backends.postgresql'),
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('POSTGRES_USER'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('DB_HOST'),
-#         'PORT': os.getenv('DB_PORT')
-#     }
-# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -150,7 +140,6 @@ USE_TZ = True  # если ошибка по naive datetime, меняем на Fa
 
 STATIC_URL = '/static/'
 STATIC_ROOT = (BASE_DIR / 'static')
-# STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = (BASE_DIR / 'media')
@@ -159,9 +148,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
-# на втором этапе добавить
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',
+# ]
 
-# CORS_URLS_REGEX = r'^/api/.*$'
+CORS_URLS_REGEX = r'^/api/.*$'
 
 FILE_NAME = 'Список_покупок.txt'
