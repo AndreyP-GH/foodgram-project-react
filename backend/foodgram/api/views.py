@@ -82,7 +82,6 @@ class CustomUserViewSet(UserViewSet):
                     status=status.HTTP_201_CREATED)
             return Response('Вы уже подписаны на этого пользователя.',
                             status=status.HTTP_400_BAD_REQUEST)
-        # if request.method == 'DELETE':
         is_in_subscriptions = Follow.objects.filter(
             user=request.user, author=author)
         if is_in_subscriptions:

@@ -9,9 +9,6 @@ services:
       - ./.env
 
   backend:
-    # build:
-    #   context: ../backend
-    #   dockerfile: Dockerfile
     platform: linux/x86_64
     image: andreydh/foodgram-backend:latest
     restart: always
