@@ -12,7 +12,7 @@ services:
     # build:
     #   context: ../backend
     #   dockerfile: Dockerfile
-    # platform: linux/x86_64
+    platform: linux/x86_64
     image: andreydh/foodgram-backend:latest
     restart: always
     volumes:
@@ -24,8 +24,8 @@ services:
       - ./.env
 
   frontend:
+    platform: linux/x86_64
     image: andreydh/foodgram-frontend:v1.26.05.23
-    # platform: linux/x86_64
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
