@@ -7,7 +7,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', default='sercret_key')
+SECRET_KEY = os.getenv('SECRET_KEY', default='sercretkey')
 
 DEBUG = False
 
@@ -75,7 +75,7 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
         'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432')
+        'PORT': os.getenv('DB_PORT', default=5432)
     }
 }
 
